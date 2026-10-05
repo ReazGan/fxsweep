@@ -1,0 +1,30 @@
+name: fxsweep
+description: Scan FiveM resources for known backdoors and leaked secrets
+branding:
+  icon: shield
+  color: gray-dark
+
+inputs:
+  path:
+    description: Folder to scan
+    default: "."
+  min:
+    description: Lowest severity to report (low, medium or high)
+    default: low
+  version:
+    description: fxsweep version to run
+    default: latest
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-go@v5
+      with:
+        go-version: stable
+        cache: false
+    - shell: bash
+      env:
+        FXSWEEP_PATH: ${{ inputs.path }}
+        FXSWEEP_MIN: ${{ inputs.min }}
+        FXSWEEP_VERSION: ${{ inputs.version }}
+      run: go run "github.com/ReazGan/fxsweep@${FXSWEEP_VERSION}" -min "$FXSWEEP_MIN" "$FXSWEEP_PATH"

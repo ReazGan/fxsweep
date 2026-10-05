@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="842" height="701" viewBox="0 0 842 701">
+<rect width="842" height="701" rx="8" fill="#1d2026"/>
+<g fill="#3a3f48"><circle cx="20" cy="18" r="5"/><circle cx="38" cy="18" r="5"/><circle cx="56" cy="18" r="5"/></g>
+<g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" xml:space="preserve">
+<text y="52" style="white-space:pre"><tspan x="22.0" fill="#cdd3dc" >$ fxsweep server-data</tspan></text>
+<text y="71" style="white-space:pre"><tspan x="22.0" fill="#cdd3dc" font-weight="bold" >fxsweep</tspan><tspan x="89.2" fill="#cdd3dc" >v0.1.0</tspan></text>
+<text y="90" style="white-space:pre"><tspan x="22.0" fill="#cdd3dc" >scanning server-data</tspan></text>
+<text y="109" style="white-space:pre"></text>
+<text y="128" style="white-space:pre"><tspan x="30.4" fill="#e2615a" font-weight="bold" >HIGH</tspan><tspan x="80.8" fill="#7c8592" >FX020</tspan><tspan x="139.6" fill="#cdd3dc" >Discord webhook sent to players</tspan></text>
+<text y="147" style="white-space:pre"><tspan x="139.6" fill="#cdd3dc" >[police_mdt] resources/[jobs]/police_mdt/html/app.js:3</tspan></text>
+<text y="166" style="white-space:pre"><tspan x="139.6" fill="#7c8592" >players can read this file and spam or delete the webhook</tspan></text>
+<text y="185" style="white-space:pre"></text>
+<text y="204" style="white-space:pre"><tspan x="30.4" fill="#e2615a" font-weight="bold" >HIGH</tspan><tspan x="80.8" fill="#7c8592" >FX010</tspan><tspan x="139.6" fill="#cdd3dc" >Hidden script entry in manifest</tspan></text>
+<text y="223" style="white-space:pre"><tspan x="139.6" fill="#cdd3dc" >[vehshop_pro] resources/[leaks]/vehshop_pro/fxmanifest.lua:4</tspan></text>
+<text y="242" style="white-space:pre"><tspan x="139.6" fill="#7c8592" >real entry commented out and a hidden script padded onto the same line</tspan></text>
+<text y="261" style="white-space:pre"></text>
+<text y="280" style="white-space:pre"><tspan x="30.4" fill="#e2615a" font-weight="bold" >HIGH</tspan><tspan x="80.8" fill="#7c8592" >FX003</tspan><tspan x="139.6" fill="#cdd3dc" >XOR string dropper</tspan></text>
+<text y="299" style="white-space:pre"><tspan x="139.6" fill="#cdd3dc" >[vehshop_pro] resources/[leaks]/vehshop_pro/node_modules/.cache/babel_config.js:1</tspan></text>
+<text y="318" style="white-space:pre"></text>
+<text y="337" style="white-space:pre"><tspan x="30.4" fill="#e2615a" font-weight="bold" >HIGH</tspan><tspan x="80.8" fill="#7c8592" >FX012</tspan><tspan x="139.6" fill="#cdd3dc" >Known dropper file name</tspan></text>
+<text y="356" style="white-space:pre"><tspan x="139.6" fill="#cdd3dc" >[vehshop_pro] resources/[leaks]/vehshop_pro/node_modules/.cache/babel_config.js:1</tspan></text>
+<text y="375" style="white-space:pre"><tspan x="139.6" fill="#7c8592" >babel_config.js with loader code</tspan></text>
+<text y="394" style="white-space:pre"></text>
+<text y="413" style="white-space:pre"><tspan x="30.4" fill="#e2615a" font-weight="bold" >HIGH</tspan><tspan x="80.8" fill="#7c8592" >FX004</tspan><tspan x="139.6" fill="#cdd3dc" >Encoded payload</tspan></text>
+<text y="432" style="white-space:pre"><tspan x="139.6" fill="#cdd3dc" >[vehshop_pro] resources/[leaks]/vehshop_pro/server.lua:1</tspan></text>
+<text y="451" style="white-space:pre"><tspan x="139.6" fill="#7c8592" >decodes to: https://example.invalid/i?to=vehshop_pro</tspan></text>
+<text y="470" style="white-space:pre"></text>
+<text y="489" style="white-space:pre"><tspan x="30.4" fill="#e2615a" font-weight="bold" >HIGH</tspan><tspan x="80.8" fill="#7c8592" >FX002</tspan><tspan x="139.6" fill="#cdd3dc" >Downloads and runs remote code</tspan></text>
+<text y="508" style="white-space:pre"><tspan x="139.6" fill="#cdd3dc" >[vehshop_pro] resources/[leaks]/vehshop_pro/server.lua:3</tspan></text>
+<text y="527" style="white-space:pre"><tspan x="139.6" fill="#7c8592" >HTTP response is executed as code</tspan></text>
+<text y="546" style="white-space:pre"></text>
+<text y="565" style="white-space:pre"><tspan x="30.4" fill="#e2615a" font-weight="bold" >HIGH</tspan><tspan x="80.8" fill="#7c8592" >FX031</tspan><tspan x="139.6" fill="#cdd3dc" >Every player can run every command</tspan></text>
+<text y="584" style="white-space:pre"><tspan x="139.6" fill="#cdd3dc" >server.cfg:3</tspan></text>
+<text y="603" style="white-space:pre"><tspan x="139.6" fill="#7c8592" >add_ace builtin.everyone command allow</tspan></text>
+<text y="622" style="white-space:pre"></text>
+<text y="641" style="white-space:pre"><tspan x="22.0" fill="#cdd3dc" >4 resources, 14 files in 1ms</tspan></text>
+<text y="660" style="white-space:pre"><tspan x="22.0" fill="#e2615a" font-weight="bold" >7 high</tspan><tspan x="72.4" fill="#cdd3dc" >, </tspan><tspan x="89.2" fill="#d7a54a" >0 medium</tspan><tspan x="156.4" fill="#cdd3dc" >, </tspan><tspan x="173.2" fill="#5fb3c4" >0 low</tspan></text>
+</g></svg>

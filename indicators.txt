@@ -1,0 +1,48 @@
+# Known FiveM backdoor infrastructure and markers.
+#
+# Format: <family> <indicator>
+# Matching is a plain, case sensitive substring search in .lua, .js, .cfg,
+# .json and .html files. Add your own with: fxsweep -ioc my-list.txt
+#
+# Sources: public reverse engineering of Blum Panel / Warden Panel by Justice
+# Gaming Network (March 2026), cfx.re community reports on Cipher Panel.
+
+# Panel and C2 domains
+cipher    cipher-panel.me
+cipher    ciphercheats.com
+blum      blum-panel.me
+blum      blum-panel.com
+blum      warden-panel.me
+blum      9ns1.com
+blum      2ns3.net
+blum      fivems.lt
+blum      fivemgtax.com
+blum      0xchitado.com
+blum      giithub.net
+blum      bhlool.com
+blum      flowleakz.org
+blum      z1lly.org
+blum      l00x.org
+blum      monloox.com
+blum      noanimeisgay.com
+blum      5mscripts.net
+blum      2312321321321213.com
+gfx       gfxpanel
+
+# Operator handles, keys and runtime markers
+blum      bertjj
+blum      bertJJ
+blum      miauss
+blum      miausas
+blum      VB8mdVjrzd
+blum      GlobalState.ggWP
+blum      devJJ
+blum      nullJJ
+blum      zXeAHJJ
+blum      1470175544682217685
+blum      pe8DNcnZCjKPlKF24tk72R
+
+# JScrambler residue from the Blum payload
+blum      UARZT6[
+blum      aga[0x
+blum      ᗡ
