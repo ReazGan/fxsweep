@@ -16,7 +16,8 @@ import (
 var version = "dev"
 
 func main() {
-	pause := len(os.Args) == 1 && ownsConsole()
+	// Double click, or a folder dropped onto the exe.
+	pause := ownsConsole()
 	code := run(os.Args[1:], os.Stdout, os.Stderr)
 	if pause {
 		fmt.Print("\npress Enter to close")

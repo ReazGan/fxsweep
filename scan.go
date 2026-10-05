@@ -69,7 +69,7 @@ func scan(root string, opts scanOptions) (*report, error) {
 		}
 		if d.IsDir() {
 			name := d.Name()
-			if p != root && (name == ".git" || p == opts.skip || (name == "cache" && filepath.Dir(p) == root)) {
+			if p != root && (name == ".git" || p == opts.skip || isServerCache(p, name)) {
 				return filepath.SkipDir
 			}
 			return nil
@@ -175,6 +175,16 @@ func scanFile(root, p string, resources map[string]*resource, inds []indicator) 
 	}
 	checkFile(c, inds)
 	return c.findings
+}
+
+// isServerCache spots the cache folder FXServer keeps next to resources.
+// It only holds copies of the resources, so scanning it doubles every finding.
+func isServerCache(p, name string) bool {
+	if name != "cache" {
+		return false
+	}
+	st, err := os.Stat(filepath.Join(filepath.Dir(p), "resources"))
+	return err == nil && st.IsDir()
 }
 
 // findResource returns the closest enclosing resource of dir.

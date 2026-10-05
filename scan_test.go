@@ -163,6 +163,8 @@ func TestScanCleanServer(t *testing.T) {
 func TestCacheFolderSkipped(t *testing.T) {
 	root := writeTree(t, map[string]string{
 		"cache/files/bad/server.lua":     "local host = 'cipher-panel.me'\n",
+		"txData/base/cache/files/a.lua":  "local host = 'cipher-panel.me'\n",
+		"txData/base/resources/y/b.lua":  "local x = 1\n",
 		"resources/x/cache/server.lua":   "local host = 'cipher-panel.me'\n",
 		"resources/x/fxmanifest.lua":     "fx_version 'cerulean'\n",
 		"resources/x/.git/hooks/pre.lua": "local host = 'cipher-panel.me'\n",
