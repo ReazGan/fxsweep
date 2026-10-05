@@ -10,3 +10,5 @@ func enableColor(f *os.File) bool {
 }
 
 func ownsConsole() bool { return false }
+
+func systemTurkish() bool { return false }

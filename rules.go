@@ -40,34 +40,36 @@ func parseSeverity(s string) (severity, error) {
 }
 
 type rule struct {
-	title string
 	// quarantine marks rules where the flagged file is the malware itself,
 	// so moving it out disables the backdoor without breaking anything else.
 	quarantine bool
+	// backdoor means the server is likely compromised, not just misconfigured.
+	backdoor bool
 }
 
 var rules = map[string]rule{
-	"FX001": {"Known backdoor indicator", true},
-	"FX002": {"Downloads and runs remote code", true},
-	"FX003": {"XOR string dropper", true},
-	"FX004": {"Encoded payload", true},
-	"FX005": {"Obfuscated code", false},
-	"FX006": {"Runs shell commands", false},
-	"FX007": {"txAdmin tampering", false},
-	"FX008": {"Runs an encoded string", true},
-	"FX010": {"Hidden script entry in manifest", false},
-	"FX011": {"Suspicious script path in manifest", false},
-	"FX012": {"Known dropper file name", true},
-	"FX020": {"Discord webhook sent to players", false},
-	"FX021": {"Database credentials sent to players", false},
-	"FX030": {"RCON enabled", false},
-	"FX031": {"Every player can run every command", false},
+	"FX001": {true, true},
+	"FX002": {true, true},
+	"FX003": {true, true},
+	"FX004": {true, true},
+	"FX005": {false, false},
+	"FX006": {false, false},
+	"FX007": {false, true},
+	"FX008": {true, true},
+	"FX010": {false, true},
+	"FX011": {false, false},
+	"FX012": {true, true},
+	"FX020": {false, false},
+	"FX021": {false, false},
+	"FX030": {false, false},
+	"FX031": {false, false},
 }
 
 // fileCtx is one file being checked.
 type fileCtx struct {
 	rel      string // relative to the scan root, slash separated
 	resource string
+	resPath  string // resource folder relative to the scan root
 	ext      string
 	base     string
 	client   bool
@@ -79,7 +81,7 @@ type fileCtx struct {
 func (c *fileCtx) line(off int) int { return strings.Count(c.src[:off], "\n") + 1 }
 
 func (c *fileCtx) add(id string, sev severity, off int, detail string) {
-	f := Finding{Rule: id, Severity: sev, Title: rules[id].title, Resource: c.resource, File: c.rel, Detail: detail}
+	f := Finding{Rule: id, Severity: sev, Title: messages["en"].rules[id].title, Resource: c.resource, ResourcePath: c.resPath, File: c.rel, Detail: detail}
 	if off >= 0 {
 		f.Line = c.line(off)
 	}
@@ -159,10 +161,10 @@ func checkCode(c *fileCtx, lang string) {
 		execs = exec.FindAllStringIndex(c.src, -1)
 	}
 	if off, ok := nearby(fetch.FindAllStringIndex(c.src, -1), execs); ok {
-		c.add("FX002", high, off, "HTTP response is executed as code")
+		c.add("FX002", high, off, "")
 	}
 	if loc := encoded.FindStringIndex(c.src); loc != nil {
-		c.add("FX008", high, loc[0], "executes a string built from character codes or escapes")
+		c.add("FX008", high, loc[0], "")
 	}
 
 	for i, run := range findEscapeRuns(c.src, lang == "lua") {
@@ -179,7 +181,7 @@ func checkCode(c *fileCtx, lang string) {
 				break
 			}
 		}
-		c.add("FX004", sev, run.offset, "decodes to: "+printable(run.decoded, 80))
+		c.add("FX004", sev, run.offset, printable(run.decoded, 80))
 	}
 
 	if lang == "js" {
@@ -191,10 +193,10 @@ func checkCode(c *fileCtx, lang string) {
 			if c.client {
 				sev = low
 			}
-			c.add("FX005", sev, -1, "javascript-obfuscator output (_0x names)")
+			c.add("FX005", sev, -1, "javascript-obfuscator")
 		}
 	} else if i := strings.Index(c.src, "Luraph Obfuscator"); i >= 0 {
-		c.add("FX005", medium, i, "Luraph obfuscated Lua, check where this script came from")
+		c.add("FX005", medium, i, "Luraph")
 	}
 
 	// txAdmin, the yarn builder and plenty of npm packages need child_process.
@@ -264,7 +266,7 @@ func checkTxAdmin(c *fileCtx) {
 	}
 	if strings.Contains(c.rel, "monitor/") {
 		if i := strings.Index(c.src, "RESOURCE_EXCLUDE"); i >= 0 {
-			c.add("FX007", high, i, "RESOURCE_EXCLUDE hides resources from the txAdmin dashboard")
+			c.add("FX007", high, i, "RESOURCE_EXCLUDE")
 		}
 	}
 }
@@ -290,10 +292,10 @@ func checkDropperName(c *fileCtx) {
 		return
 	}
 	if loc := loaderMarkers.FindStringIndex(c.src); loc != nil {
-		c.add("FX012", high, loc[0], c.base+" with loader code")
+		c.add("FX012", high, loc[0], "")
 		return
 	}
-	c.add("FX012", low, -1, c.base+", no loader code found, check by hand")
+	c.add("FX012", low, -1, "")
 }
 
 var (
@@ -303,10 +305,10 @@ var (
 
 func checkClientLeaks(c *fileCtx) {
 	if loc := webhookRe.FindStringIndex(c.src); loc != nil {
-		c.add("FX020", high, loc[0], "players can read this file and spam or delete the webhook")
+		c.add("FX020", high, loc[0], "")
 	}
 	if loc := dbCredsRe.FindStringIndex(c.src); loc != nil {
-		c.add("FX021", high, loc[0], "players can read this file")
+		c.add("FX021", high, loc[0], "")
 	}
 }
 
@@ -321,7 +323,7 @@ func checkServerCfg(c *fileCtx) {
 		t := strings.TrimSpace(ln)
 		if !strings.HasPrefix(t, "#") && !strings.HasPrefix(t, "//") {
 			if m := rconRe.FindStringSubmatch(t); m != nil && m[1] != "" {
-				c.add("FX030", medium, off, "RCON sends the password in plain text, remove rcon_password")
+				c.add("FX030", medium, off, "")
 			}
 			if m := everyoneRe.FindStringSubmatch(t); m != nil {
 				c.add("FX031", high, off, "add_ace "+m[1]+" command allow")
@@ -332,12 +334,12 @@ func checkServerCfg(c *fileCtx) {
 }
 
 var (
-	hiddenDecoyRe = regexp.MustCompile(`--\[\[[^\]]*\]\][ \t]{20,}['"][^'"]*\.(?:js|lua)['"]`)
+	hiddenDecoyRe = regexp.MustCompile(`--\[\[[^\]]*\]\][ \t]{20,}['"]([^'"]*\.(?:js|lua))['"]`)
 )
 
 func checkManifest(c *fileCtx, m *manifest) {
-	if loc := hiddenDecoyRe.FindStringIndex(c.src); loc != nil {
-		c.add("FX010", high, loc[0], "real entry commented out and a hidden script padded onto the same line")
+	if m := hiddenDecoyRe.FindStringSubmatchIndex(c.src); m != nil {
+		c.add("FX010", high, m[0], "'"+c.src[m[2]:m[3]]+"'")
 	}
 	for _, e := range m.entries {
 		if !strings.Contains(e.directive, "script") {
@@ -348,7 +350,7 @@ func checkManifest(c *fileCtx, m *manifest) {
 		ext := path.Ext(base)
 		switch {
 		case strings.HasPrefix(base, ".") && (ext == ".js" || ext == ".lua"):
-			c.addLine("FX010", high, e.line, e.directive+" '"+e.value+"' (dot file)")
+			c.addLine("FX010", high, e.line, e.directive+" '"+e.value+"'")
 		case strings.Contains(v, "node_modules/.") || strings.Contains(v, ".cache/") || dropperNames[strings.ToLower(base)]:
 			c.addLine("FX011", medium, e.line, e.directive+" '"+e.value+"'")
 		}

@@ -9,10 +9,17 @@ import (
 )
 
 var (
-	kernel32                  = syscall.NewLazyDLL("kernel32.dll")
-	procSetConsoleMode        = kernel32.NewProc("SetConsoleMode")
-	procGetConsoleProcessList = kernel32.NewProc("GetConsoleProcessList")
+	kernel32                     = syscall.NewLazyDLL("kernel32.dll")
+	procSetConsoleMode           = kernel32.NewProc("SetConsoleMode")
+	procGetConsoleProcessList    = kernel32.NewProc("GetConsoleProcessList")
+	procGetUserDefaultUILanguage = kernel32.NewProc("GetUserDefaultUILanguage")
 )
+
+// systemTurkish reports whether Windows is displayed in Turkish.
+func systemTurkish() bool {
+	id, _, _ := procGetUserDefaultUILanguage.Call()
+	return id&0x3ff == 0x1f // LANG_TURKISH
+}
 
 const enableVirtualTerminalProcessing = 0x0004
 

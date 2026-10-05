@@ -10,7 +10,7 @@ they talk to, and a few server mistakes that make the damage worse.
 
 Single binary. No Python or Node, no network calls, nothing leaves your machine.
 
-![fxsweep finding a webhook leak, a hidden manifest entry and a remote loader in a leaked resource](https://raw.githubusercontent.com/ReazGan/fxsweep/main/docs/screenshot.svg)
+![fxsweep finding a hidden manifest entry, an encoded URL and a remote loader in a leaked resource](https://raw.githubusercontent.com/ReazGan/fxsweep/main/docs/screenshot.svg)
 
 ## Install
 
@@ -26,7 +26,7 @@ go install github.com/ReazGan/fxsweep@latest
 ## Usage
 
 On Windows, drop `fxsweep.exe` into your `server-data` folder and double click
-it. From a terminal:
+it, or drag a server folder onto the exe. From a terminal:
 
 ```
 fxsweep C:\FXServer\server-data
@@ -35,6 +35,11 @@ fxsweep -json . > report.json
 fxsweep -quarantine ..\quarantine .     # move infected files out of the server
 fxsweep -ioc my-indicators.txt .        # add your own domains or strings
 ```
+
+Findings are grouped per resource. Each one says what it means in plain words
+and what to do about it, so the report is readable without knowing Lua. It is
+printed in Turkish on Turkish systems and in English everywhere else, `-lang en`
+or `-lang tr` picks one.
 
 Exit status is `0` when clean, `1` when there is a high severity finding and
 `2` on errors, so it can gate a CI job or a deploy script.

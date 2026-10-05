@@ -146,7 +146,7 @@ func TestManifestDotFileAndDecoy(t *testing.T) {
 			continue
 		}
 		dot = dot || strings.Contains(f.Detail, ".sync.js")
-		decoy = decoy || strings.Contains(f.Detail, "commented out")
+		decoy = decoy || strings.Contains(f.Detail, "server/.cache.js")
 	}
 	if !dot || !decoy {
 		t.Errorf("dot file entry found: %v, padded decoy found: %v", dot, decoy)
@@ -218,14 +218,14 @@ func TestQuarantine(t *testing.T) {
 
 func TestRunExitCodes(t *testing.T) {
 	var out, errb bytes.Buffer
-	if code := run([]string{"-no-color", infectedTree(t)}, &out, &errb); code != 1 {
+	if code := run([]string{"-lang", "en", "-no-color", infectedTree(t)}, &out, &errb); code != 1 {
 		t.Errorf("infected: exit %d, stderr %s", code, errb.String())
 	}
 	if !strings.Contains(out.String(), "FX002") {
 		t.Errorf("text report missing FX002:\n%s", out.String())
 	}
 	out.Reset()
-	if code := run([]string{"-no-color", cleanTree(t)}, &out, &errb); code != 0 {
+	if code := run([]string{"-lang", "en", "-no-color", cleanTree(t)}, &out, &errb); code != 0 {
 		t.Errorf("clean: exit %d", code)
 	}
 	if !strings.Contains(out.String(), "no backdoor indicators found") {
@@ -241,7 +241,7 @@ func TestRunExitCodes(t *testing.T) {
 
 func TestRunJSONAndMin(t *testing.T) {
 	var out, errb bytes.Buffer
-	code := run([]string{"-json", "-min", "high", infectedTree(t)}, &out, &errb)
+	code := run([]string{"-lang", "en", "-json", "-min", "high", infectedTree(t)}, &out, &errb)
 	if code != 1 {
 		t.Fatalf("exit %d", code)
 	}
@@ -267,10 +267,60 @@ func TestExtraIndicators(t *testing.T) {
 	ioc := filepath.Join(t.TempDir(), "ioc.txt")
 	os.WriteFile(ioc, []byte("# mine\nmyfamily evil.example\n"), 0o644)
 	var out, errb bytes.Buffer
-	if code := run([]string{"-no-color", "-ioc", ioc, root}, &out, &errb); code != 1 {
+	if code := run([]string{"-lang", "en", "-no-color", "-ioc", ioc, root}, &out, &errb); code != 1 {
 		t.Fatalf("exit %d\n%s%s", code, out.String(), errb.String())
 	}
 	if !strings.Contains(out.String(), "myfamily: evil.example") {
 		t.Errorf("custom indicator not reported:\n%s", out.String())
+	}
+}
+
+func TestReportExplainsFindings(t *testing.T) {
+	root := infectedTree(t)
+	var out, errb bytes.Buffer
+	run([]string{"-lang", "en", "-no-color", root}, &out, &errb)
+	s := out.String()
+	for _, want := range []string{
+		en.rules["FX002"].title,
+		"Downloads code from the internet",
+		"What to do: Delete this resource",
+		en.serverFiles,
+		en.nextSteps,
+		"1. Stop the server.",
+	} {
+		if !strings.Contains(s, want) {
+			t.Errorf("English report missing %q", want)
+		}
+	}
+
+	out.Reset()
+	run([]string{"-lang", "tr", "-no-color", root}, &out, &errb)
+	s = out.String()
+	for _, want := range []string{"YÜKSEK", tr.rules["FX020"].title, "Ne yapmalı:", tr.nextSteps, "1. Sunucuyu kapat."} {
+		if !strings.Contains(s, want) {
+			t.Errorf("Turkish report missing %q", want)
+		}
+	}
+
+	if code := run([]string{"-lang", "de", root}, &out, &errb); code != 2 {
+		t.Errorf("unknown language: exit %d", code)
+	}
+}
+
+func TestEveryRuleIsTranslated(t *testing.T) {
+	for id := range rules {
+		for name, c := range messages {
+			if r := c.rules[id]; r.title == "" || r.why == "" || r.fix == "" {
+				t.Errorf("%s: %s text missing", name, id)
+			}
+		}
+	}
+}
+
+func TestWrap(t *testing.T) {
+	got := wrap("bir iki üç dört beş", 8)
+	want := []string{"bir iki", "üç dört", "beş"}
+	if strings.Join(got, "|") != strings.Join(want, "|") {
+		t.Errorf("wrap = %q", got)
 	}
 }

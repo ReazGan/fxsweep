@@ -14,13 +14,14 @@ import (
 )
 
 type Finding struct {
-	Rule     string   `json:"rule"`
-	Severity severity `json:"severity"`
-	Title    string   `json:"title"`
-	Resource string   `json:"resource,omitempty"`
-	File     string   `json:"file"`
-	Line     int      `json:"line,omitempty"`
-	Detail   string   `json:"detail,omitempty"`
+	Rule         string   `json:"rule"`
+	Severity     severity `json:"severity"`
+	Title        string   `json:"title"`
+	Resource     string   `json:"resource,omitempty"`
+	ResourcePath string   `json:"resource_path,omitempty"`
+	File         string   `json:"file"`
+	Line         int      `json:"line,omitempty"`
+	Detail       string   `json:"detail,omitempty"`
 }
 
 type report struct {
@@ -167,6 +168,9 @@ func scanFile(root, p string, resources map[string]*resource, inds []indicator) 
 	resDir, res := findResource(root, filepath.Dir(p), resources)
 	if res != nil {
 		c.resource = res.name
+		if rp, err := filepath.Rel(root, resDir); err == nil {
+			c.resPath = filepath.ToSlash(rp)
+		}
 		inRes, _ := filepath.Rel(resDir, p)
 		c.client = res.m.isClient(filepath.ToSlash(inRes))
 		if p == res.manifest {

@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime/debug"
+	"strings"
 )
 
 var version = "dev"
@@ -20,7 +21,7 @@ func main() {
 	pause := ownsConsole()
 	code := run(os.Args[1:], os.Stdout, os.Stderr)
 	if pause {
-		fmt.Print("\npress Enter to close")
+		fmt.Print("\n" + messages[detectLang()].pressEnter)
 		bufio.NewReader(os.Stdin).ReadString('\n')
 	}
 	os.Exit(code)
@@ -34,6 +35,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 	qdir := fl.String("quarantine", "", "move files with high severity backdoor findings into `dir`")
 	iocFile := fl.String("ioc", "", "extra indicator list, one \"<family> <indicator>\" per line")
 	noColor := fl.Bool("no-color", false, "disable colored output")
+	langFlag := fl.String("lang", "", "report language: en or tr (default: system language)")
 	showVersion := fl.Bool("version", false, "print the version and exit")
 	fl.Usage = func() {
 		fmt.Fprintf(stderr, "usage: fxsweep [flags] [path]\n\n")
@@ -59,6 +61,13 @@ func run(args []string, stdout, stderr io.Writer) int {
 	root := "."
 	if fl.NArg() == 1 {
 		root = fl.Arg(0)
+	}
+	msg := messages[detectLang()]
+	if *langFlag != "" {
+		if msg = messages[strings.ToLower(*langFlag)]; msg == nil {
+			fmt.Fprintf(stderr, "fxsweep: unknown language %q (use en or tr)\n", *langFlag)
+			return 2
+		}
 	}
 	min, err := parseSeverity(*minSev)
 	if err != nil {
@@ -113,7 +122,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 	} else {
 		color := !*noColor && os.Getenv("NO_COLOR") == "" &&
 			(forceColor() || stdout == os.Stdout && enableColor(os.Stdout))
-		printText(stdout, r, moved, *qdir, color)
+		printText(stdout, r, moved, *qdir, color, msg)
 	}
 	if worst == high {
 		return 1
